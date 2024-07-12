@@ -1,0 +1,50 @@
+services:
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana2
+    ports:
+      - 13000:3000
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_USERS_DEFAULT_THEME=light
+
+  tempo:
+    image: grafana/tempo:latest
+    container_name: tempo
+    ports:
+      - 13200:3200   # tempo http
+      - 19095:9095   # tempo grpc
+      - 14268:14268 # jaeger ingest
+      - 14318:4318   # otlp http
+      - 14317:4317   # otlp grpc
+    volumes:
+      - ./configs/tempo/tempo-local.yaml:/etc/tempo-local.yaml
+    command: ["-config.file=/etc/tempo-local.yaml"]
+
+  loki:
+    image: grafana/loki:latest
+    container_name: loki
+    ports:
+      - 13100:3100
+    command: -config.file=/etc/loki/local-config.yaml
+
+  cortex:
+    image: cortexproject/cortex:v1.17.1
+    container_name: cortex
+    command: -config.file=/etc/single-process-config.yaml 
+    ports:
+      - "19009:9009"
+    volumes:
+      - "./configs/cortex/single-process-config.yaml:/etc/single-process-config.yaml"
+
+  otelcol:
+    image: otel/opentelemetry-collector-contrib
+    container_name: otelcol
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+    volumes:
+      - "./configs/otelcol/otelcol.yaml:/etc/otelcol.yaml"
+    command: ["--config=/etc/otelcol.yaml"]
+

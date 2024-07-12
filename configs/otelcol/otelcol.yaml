@@ -1,0 +1,49 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: "0.0.0.0:4317"
+      http:
+        endpoint: "0.0.0.0:4318"
+        cors:
+          allowed_origins:
+            - http://*
+            - https://*
+          allowed_headers:
+            - "*"
+
+processors:
+  batch:
+
+exporters:
+  debug:
+    verbosity: detailed
+  otlp:
+    # Tempo
+    endpoint: "tempo:4317"
+    tls:
+      insecure: true
+  otlp/2:
+    # TODO: Cortex, this doesn't work
+    endpoint: "cortex:9010"
+    tls:
+      insecure: true
+  prometheusremotewrite:
+    endpoint: "http://cortex:9009/api/v1/push"
+  loki:
+    endpoint: "http://loki:3100/loki/api/v1/push"
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: []
+      exporters: [otlp]
+    metrics:
+      receivers: [otlp]
+      processors: []
+      exporters: [prometheusremotewrite]
+    logs:
+      receivers: [otlp]
+      processors: []
+      exporters: [loki]
