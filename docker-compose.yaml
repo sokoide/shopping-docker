@@ -48,3 +48,30 @@ services:
       - "./configs/otelcol/otelcol.yaml:/etc/otelcol.yaml"
     command: ["--config=/etc/otelcol.yaml"]
 
+  mongo:
+    image: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+    ports:
+      - 27017:27017
+    volumes:
+      - ./configs/mongo/db:/data/db
+      - ./configs/mongo/configdb:/data/configdb
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongo
+      ME_CONFIG_MONGODB_PORT: 27017
+      ME_CONFIG_MONGODB_AUTH_USERNAME: root
+      ME_CONFIG_MONGODB_AUTH_PASSWORD: password
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: password
+    depends_on:
+      - mongo
+
+

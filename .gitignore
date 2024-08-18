@@ -1,0 +1,9 @@
+tags
+
+# ignore everything under configs/mongo
+/configs/mongo/configdb/*
+/configs/mongo/db/*
+
+# except for the followings
+!/configs/mongo/configdb/placeholder.txt
+!/configs/mongo/db/placeholder.txt
